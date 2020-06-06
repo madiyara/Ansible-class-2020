@@ -1,0 +1,12 @@
+---
+- name: First playbook
+  name: locahhost
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Task1
+    ping: 
+
+
+
+
