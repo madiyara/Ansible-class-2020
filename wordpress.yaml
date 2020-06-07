@@ -1,0 +1,58 @@
+---
+- name: Install wordpress on CentOS 7 
+  hosts: all 
+  become: true
+  become_method: sudo
+  user: centos  
+  tasks:
+    - name: Install remi repo.
+      yum:
+        name: http://rpms.famillecollet.com/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+        state: present
+
+
+    - name: enable remi-php73
+      shell: "yum-config-manager --enable remi-php73"
+
+
+
+    - name: Install httpd
+      package: 
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - httpd
+        - php
+        - mysql
+        - php-mysql
+
+      ignore_errors: yes 
+
+
+    - name: Download wordpress
+      get_url:
+        url: https://wordpress.org/latest.tar.gz 
+        dest: /var/www/html/
+
+    
+    - name: Unzip latest.tar.gz
+      unarchive: 
+        src: /var/www/html/wordpress-5.4.1.tar.gz
+        dest: /var/www/html/
+        remote_src: yes 
+
+    - name: Move files to html folder
+      shell: "mv /var/www/html/wordpress/* /var/www/html 2>/dev/null"
+      become: yes
+      become_method: sudo
+      ignore_errors: yes
+
+    - name: Restart httpd
+      systemd:
+        name: httpd
+        state: restarted  
+        enabled: yes
+      become: yes
+      become_method: sudo
+
+   
